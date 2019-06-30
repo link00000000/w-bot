@@ -6,5 +6,11 @@
   "repository": "git@github.com:link00000000/w-bot.git",
   "author": "link00000000 <crandall.logan@gmail.com>",
   "license": "GPL-3.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "discord.js": "discordjs/discord.js"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
 }
