@@ -8,7 +8,8 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
-    "discord.js": "discordjs/discord.js"
+    "discord.js": "discordjs/discord.js",
+    "dotenv": "^8.0.0"
   },
   "scripts": {
     "start": "node index.js"
