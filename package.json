@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon ."
+    "dev": "nodemon --signal SIGINT ."
   },
   "devDependencies": {
     "nodemon": "^1.19.1"
