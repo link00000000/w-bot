@@ -15,3 +15,8 @@ client.on("message", msg => {
 });
 
 client.login(process.env.TOKEN);
+
+process.on("SIGINT", () => {
+    console.log("Terminating connection");
+    client.destroy();
+});
