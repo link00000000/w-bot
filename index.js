@@ -3,7 +3,17 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-client.on("ready", () => {
+client.on("ready", async () => {
+
+    // Set client presence
+    try {
+        let presence = await client.user.setActivity("TESTING", { type: "STREAMING" });
+        console.log(`Presence set to ${presence}`);
+    }
+    catch (e) {
+        console.error("An error has occurred while setting presence");
+        throw e;
+    }
     console.log("Discord w-bot is online");
 });
 
