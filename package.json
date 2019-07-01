@@ -12,6 +12,10 @@
     "dotenv": "^8.0.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "dev": "nodemon ."
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
   }
 }
