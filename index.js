@@ -23,7 +23,7 @@ client.on("ready", async () => {
 client.login(process.env.TOKEN);
 
 // Main
-client.on("message", msg => {
+client.on("message", async msg => {
 
     // Ignore any messages that are my own
     if(msg.author.id == client.user.id)
@@ -57,7 +57,8 @@ client.on("message", msg => {
         // If message is not 'w'
         if(msg.content != "w")
         {
-            msg.reply("Only a lowercase 'w' is valid. Your message was deleted.");
+            let myMsg = await msg.reply("Only a lowercase 'w' is valid. Your message was deleted.\n*This message will self destruct in 1 minute*");
+            setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
             try {
                 msg.delete();
             }
@@ -83,7 +84,8 @@ client.on("message", msg => {
         if(msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime < 30 * 60 * 1000)
         {
             let timeleft = new Date((30 * 60 * 1000) - (msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
-            msg.reply(`You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)`);
+            let myMsg = await msg.reply(`You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)\n*This message will self destruct in 1 minute*`);
+            setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
             return;
         }
 
@@ -108,9 +110,9 @@ async function updateTopic() {
             }
             rankings.sort((a, b) => { return a.score > b.score});
             let topicString = [
-                rankings[0] ? `1st - ${rankings[0].id} (${rankings[0].score} points)` : null,
-                rankings[1] ? `2nd - ${rankings[0].id} (${rankings[0].score} points)` : null,
-                rankings[2] ? `3rd - ${rankings[0].id} (${rankings[0].score} points)` : null
+                rankings[0] ? `:first_place: ${rankings[0].id} (${rankings[0].score} points)` : null,
+                rankings[1] ? `:second_place: ${rankings[0].id} (${rankings[0].score} points)` : null,
+                rankings[2] ? `:third_place: ${rankings[0].id} (${rankings[0].score} points)` : null
             ].filter(item => item != null).join(" | ");
             client.channels.find(ch => ch.id === channel).setTopic(topicString);
         }
