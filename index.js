@@ -85,7 +85,7 @@ let wChannels = {}; // Contains different channels with users
                 else
                 {
                     msg.delete();
-                    let myMsg = await bot.createMessage(msg.channel.id, "Unknown command. Type `;;help` for a list of commands.\n*This message will self destruct in 1 minute*");
+                    let myMsg = await bot.createMessage(msg.channel.id, "Unknown command. Type `!!help` for a list of commands.\n*This message will self destruct in 1 minute*");
                     setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
                 }
                 return;
