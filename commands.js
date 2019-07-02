@@ -1,7 +1,6 @@
 let commands = {
     "cooldowns": {
         helpMsg: "Shows the cooldown timer until another message can be sent for every user.",
-        usage: "!!cooldowns",
         async exec(msg, bot, wChannels) {
             msg.delete();
 
@@ -50,7 +49,6 @@ let commands = {
     },
     "scores": {
         helpMsg: "Shows the current scores for all players.",
-        usage: "!!scores",
         async exec(msg, bot, wChannels) {
             msg.delete();
 
@@ -68,7 +66,6 @@ let commands = {
             let embed = {
                 "content": "*This message will self destruct in 1 minute.*",
                 "embed": {
-                    "content": "*This message will self destruct in 1 minute.*",
                     "title": "Scores",
                     "description": "Time remaining for each user until another message can be sent",
                     "color": 15625592,
@@ -99,23 +96,27 @@ let commands = {
     },
     "help": {
         helpMsg: "Displays the message you are seeing.",
-        usage: "!!help",
         async exec(msg, bot, wChannels) {
-            let messageString = [
-                "\n\n**_W-Bot Commands_**\nBasic usage:\n\t\t\t\t!!<command>"
-            ];
-            for(command in commands)
-            {
-                messageString.push(
-                    [
-                        `\`${command}\``,
-                        `\t\t\t\t${commands[command].helpMsg}`
-                    ].join("\n")
-                );
+            let embed = {
+                "content": "*This message will self destruct in 1 minute.*",
+                "embed": {
+                    "title": "W-Bot Commands",
+                    "description": "General usage: `!!<command>`",
+                    "color": 12153551,
+                    "timestamp": new Date(),
+                    "footer": {
+                        "icon_url": msg.author.avatarURL,
+                        "text": "Requested by " + msg.author.username
+                    },
+                    "fields": Object.keys(commands).map(command => {
+                        return {
+                            "name": command,
+                            "value": commands[command].helpMsg
+                        }
+                    })
+                }
             }
-            messageString = messageString.join("\n\n");
-            messageString += "\n\n\n*This message will self destruct in 1 minute*";
-            let myMsg = await bot.createMessage(msg.channel.id, messageString);
+            let myMsg = await bot.createMessage(msg.channel.id, embed);
             setTimeout(() => { myMsg.delete() }, 1 * 60 * 1000);
         }
     }
