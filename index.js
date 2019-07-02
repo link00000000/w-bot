@@ -2,8 +2,8 @@ require("dotenv").config();
 
 const storage = require("node-persist");
 
-const Discord = require("discord.js");
-const client = new Discord.Client();
+const Eris = require("eris");
+let bot = new Eris(process.env.TOKEN);
 
 const commands = require("./commands.js");
 
@@ -12,41 +12,38 @@ let wChannels = {}; // Contains different channels with users
 (async () => {
     await storage.init();
     let wChannels = await storage.getItem("wChannels") || {}; // Contains active channels with users
-    console.log(wChannels);
     // Init
-    client.on("ready", async () => {
+    bot.on("ready", () => {
+        console.log("W-Bot is online");
 
         // Set client presence
         try {
-            await client.user.setActivity("@mention me a in a channel");
-            console.log("Set client presence");
+            bot.editStatus("online", { name: "@mention me a in a channel", type: 0 });
+            console.log("Set bot presence");
         }
         catch (e) {
             console.error("An error has occurred while setting presence");
             throw e;
         }
-        console.log("W-Bot is online");
     });
 
-    client.login(process.env.TOKEN);
-
     // Main
-    client.on("message", async msg => {
+    bot.on("messageCreate", async msg => {
 
         // Ignore any messages that are my own
-        if(msg.author.id == client.user.id)
+        if(msg.author.id == bot.user.id)
         {
             return;
         }
 
         // Check for @mention to begin watching chat in the channel mentioned from
-        if(msg.mentions.users.find(user => user.id == client.user.id))
+        if(msg.mentions.find(user => user.id == bot.user.id))
         {
             // Add the channel to the watch list if not already in it
             if(!wChannels[msg.channel.id])
             {
                 wChannels[msg.channel.id] = {};
-                msg.reply(`W-Bot has beeen added to this channel. Mention me again in this channel to remove me.`);
+                bot.createMessage(msg.channel.id, `W-Bot has beeen added to this channel. Mention me again in this channel to remove me.`);
                 console.log(`Added W-Bot to channel ${msg.channel.id}`);
                 try
                 {
@@ -61,7 +58,7 @@ let wChannels = {}; // Contains different channels with users
             else
             {
                 delete wChannels[msg.channel.id];
-                msg.reply(`W-Bot has been removed from this channel. Mention me again in this channel to add me back.`);
+                bot.createMessage(msg.channel.id, `W-Bot has been removed from this channel. Mention me again in this channel to add me back.`);
                 console.log(`Removed W-Bot from channel ${msg.channel.id}`);
                 try
                 {
@@ -83,12 +80,12 @@ let wChannels = {}; // Contains different channels with users
             {
                 if(commands[msg.content.substr(2)])
                 {
-                    commands[msg.content.substr(2)].exec(msg, client, wChannels);
+                    commands[msg.content.substr(2)].exec(msg, bot, wChannels);
                 }
                 else
                 {
                     msg.delete();
-                    let myMsg = await msg.reply("Unknown command. Type `;;help` for a list of commands.\n*This message will self destruct in 1 minute*");
+                    let myMsg = await bot.createMessage(msg.channel.id, "Unknown command. Type `;;help` for a list of commands.\n*This message will self destruct in 1 minute*");
                     setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
                 }
                 return;
@@ -97,14 +94,14 @@ let wChannels = {}; // Contains different channels with users
             // If message is not 'w'
             if(msg.content != "w")
             {
-                let myMsg = await msg.reply("Only a lowercase 'w' is valid. Your message was deleted.\n*This message will self destruct in 1 minute*");
+                let myMsg = await bot.createMessage(msg.channel.id, "Only a lowercase 'w' is valid. Your message was deleted.\n*This message will self destruct in 1 minute*");
                 setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
                 try {
                     msg.delete();
                 }
                 catch (e)
                 {
-                    msg.reply(`Unable to delete message: ${e}`);
+                    bot.createMessage(msg.channel.id, `Unable to delete message: ${e}`);
                 }
                 return;
             }
@@ -113,7 +110,7 @@ let wChannels = {}; // Contains different channels with users
             if(!wChannels[msg.channel.id][msg.author.id])
             {
                 wChannels[msg.channel.id][msg.author.id] = {
-                    lastMessageTime: msg.createdTimestamp,
+                    lastMessageTime: msg.timestamp,
                     score: 1
                 };
                 try
@@ -128,18 +125,17 @@ let wChannels = {}; // Contains different channels with users
             }
 
             // Check if message was sent too quickly
-            console.log("============" + JSON.stringify(wChannels));
-            if(msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime < 30 * 60 * 1000)
+            if(msg.timestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime < 30 * 60 * 1000)
             {
-                let timeleft = new Date((30 * 60 * 1000) - (msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
-                let myMsg = await msg.reply(`You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)\n*This message will self destruct in 1 minute*`);
+                let timeleft = new Date((30 * 60 * 1000) - (msg.timestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
+                let myMsg = await bot.createMessage(msg.channel.id, `You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)\n*This message will self destruct in 1 minute*`);
                 setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
                 return;
             }
 
             // Increment score
             wChannels[msg.channel.id][msg.author.id].score++;
-            wChannels[msg.channel.id][msg.author.id].lastMessageTime = msg.createdTimestamp;
+            wChannels[msg.channel.id][msg.author.id].lastMessageTime = msg.timestamp;
             try
             {
                 await storage.setItem('wChannels', wChannels);
@@ -154,15 +150,15 @@ let wChannels = {}; // Contains different channels with users
     // Shows the top 3 positions / scores in the topic. Updates every second
     setInterval(updateTopic, 1000);
     async function updateTopic() {
-      for(channel of Object.keys(wChannels))
+        console.log(wChannels);
+        for(channel of Object.keys(wChannels))
         {
             try
             {
                 let rankings = [];
-                console.log(JSON.stringify(wChannels));
-                for(user of Object.keys(wChannels[channel]))
+                for(userId of Object.keys(wChannels[channel]))
                 {
-                    rankings.push({ id: (await client.users.fetch(user)).username, score: wChannels[channel][user].score });
+                    rankings.push({ id: (await bot.users.find(user => user.id === userId)).username, score: wChannels[channel][userId].score });
                 }
                 rankings.sort((a, b) => { return a.score > b.score});
                 let topicString = [
@@ -170,19 +166,21 @@ let wChannels = {}; // Contains different channels with users
                     rankings[1] ? `:second_place: ${rankings[0].id} (${rankings[0].score} points)` : null,
                     rankings[2] ? `:third_place: ${rankings[0].id} (${rankings[0].score} points)` : null
                 ].filter(item => item != null).join(" | ");
-                client.channels.find(ch => ch.id === channel).setTopic(topicString);
+                bot.getChannel(channel).edit({topic: topicString});
             }
             catch (e)
             {
-                client.channels.find(ch => ch.id === channel).send(`Could not update topic: ${e}`);
+                bot.createMessage(channel, `Could not update topic: ${e}`);
             }
         }
     }
 
+    bot.connect();
+
     // Ctrl + C
     process.on("SIGINT", () => {
         console.log("Terminating connection");
-        client.destroy();
+        bot.disconnect();
         process.exit();
     });
 
