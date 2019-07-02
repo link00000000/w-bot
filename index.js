@@ -85,8 +85,24 @@ client.on("message", msg => {
             msg.reply(`You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)`);
             return;
         }
+
+        // Increment score
+        wChannels[msg.channel.id][msg.author.id].score++;
+        wChannels[msg.channel.id][msg.author.id].lastMessageTime = msg.createdTimestamp;
     }
 });
+
+// Shows the top 3 positions / scores in the topic. Updates every second
+setInterval(updateTopic, 1000);
+function updateTopic() {
+
+}
+
+setInterval(updatePins, 1000);
+// Shows all scores with bar graphs and cooldown times in the pinned messages. Updates every second
+function updatePins() {
+
+}
 
 // Ctrl + C
 process.on("SIGINT", () => {
