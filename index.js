@@ -151,7 +151,6 @@ let wChannels = {}; // Contains different channels with users
     // Shows the top 3 positions / scores in the topic. Updates every second
     setInterval(updateTopic, 1000);
     async function updateTopic() {
-        console.log(wChannels);
         for(channel of Object.keys(wChannels))
         {
             try
