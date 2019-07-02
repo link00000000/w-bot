@@ -25,6 +25,12 @@ client.login(process.env.TOKEN);
 // Main
 client.on("message", msg => {
 
+    // Ignore any messages that are my own
+    if(msg.author.id == client.user.id)
+    {
+        return;
+    }
+
     // Check for @mention to begin watching chat in the channel mentioned from
     if(msg.mentions.users.find(user => user.id == client.user.id))
     {
