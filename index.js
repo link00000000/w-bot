@@ -53,8 +53,18 @@ client.on("message", msg => {
     // Executed if a message is sent in a wChannel
     else if(wChannels[msg.channel.id])
     {
-        console.log(JSON.stringify(msg.channel.messages));
-        console.log("A message was sent in one of my channels " + msg.channel.id);
+        // If message is not 'w'
+        if(msg.content != "w")
+        {
+            msg.reply("Only a lowercase 'w' is valid. Your message was deleted.");
+            try {
+                msg.delete();
+            }
+            catch (e)
+            {
+                msg.reply(`Unable to delete message: ${e}`);
+            }
+        }
     }
 });
 
