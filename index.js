@@ -5,6 +5,8 @@ const storage = require("node-persist");
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+const commands = require("./commands.js");
+
 let wChannels = {}; // Contains different channels with users
 
 (async () => {
@@ -76,6 +78,22 @@ let wChannels = {}; // Contains different channels with users
         // Executed if a message is sent in a wChannel
         if(wChannels[msg.channel.id])
         {
+            // If message is a command
+            if(msg.content.substr(0, 2) == "!!")
+            {
+                if(commands[msg.content.substr(2)])
+                {
+                    commands[msg.content.substr(2)].exec(msg, client, wChannels);
+                }
+                else
+                {
+                    msg.delete();
+                    let myMsg = await msg.reply("Unknown command. Type `;;help` for a list of commands.\n*This message will self destruct in 1 minute*");
+                    setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
+                }
+                return;
+            }
+
             // If message is not 'w'
             if(msg.content != "w")
             {
