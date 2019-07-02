@@ -118,14 +118,7 @@ async function updateTopic() {
         {
             client.channels.find(ch => ch.id === channel).send(`Could not update topic: ${e}`);
         }
-
     }
-}
-
-setInterval(updatePins, 1000);
-// Shows all scores with bar graphs and cooldown times in the pinned messages. Updates every second
-function updatePins() {
-
 }
 
 // Ctrl + C
