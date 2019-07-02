@@ -83,7 +83,7 @@ let commands = {
                             "inline": true
                         },
                         {
-                            "name": "Time remaining",
+                            "name": "Score",
                             "value": scores.map(item => item.value).join("\n"),
                             "inline": true
                         }
