@@ -3,7 +3,7 @@ require("dotenv").config();
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
-let wChannels = []; // Contains list of channels to watch
+let wChannels = {}; // Contains different channels with users
 
 // Init
 client.on("ready", async () => {
@@ -35,20 +35,26 @@ client.on("message", msg => {
     if(msg.mentions.users.find(user => user.id == client.user.id))
     {
         // Add the channel to the watch list if not already in it
-        let curChannelIndex = wChannels.indexOf(msg.channel.id);
-        if(curChannelIndex === -1)
+        if(!wChannels[msg.channel.id])
         {
-            wChannels.push(msg.channel.id);
+            wChannels[msg.channel.id] = [];
             msg.reply(`W-Bot has beeen added to this channel. Mention me again in this channel to remove me.`);
             console.log(`Added W-Bot to channel ${msg.channel.id}`);
         }
         // Checks if channel is already being watched, if so remove the channel from the watch list
         else
         {
-            wChannels.splice(curChannelIndex, 1);
+            delete wChannels[msg.channel.id];
             msg.reply(`W-Bot has been removed from this channel. Mention me again in this channel to add me back.`);
             console.log(`Removed W-Bot from channel ${msg.channel.id}`);
         }
+    }
+
+    // Executed if a message is sent in a wChannel
+    else if(wChannels[msg.channel.id])
+    {
+        console.log(JSON.stringify(msg.channel.messages));
+        console.log("A message was sent in one of my channels " + msg.channel.id);
     }
 });
 
