@@ -37,7 +37,7 @@ client.on("message", msg => {
         // Add the channel to the watch list if not already in it
         if(!wChannels[msg.channel.id])
         {
-            wChannels[msg.channel.id] = [];
+            wChannels[msg.channel.id] = {};
             msg.reply(`W-Bot has beeen added to this channel. Mention me again in this channel to remove me.`);
             console.log(`Added W-Bot to channel ${msg.channel.id}`);
         }
@@ -79,6 +79,7 @@ client.on("message", msg => {
         }
 
         // Check if message was sent too quickly
+        console.log("============" + JSON.stringify(wChannels));
         if(msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime < 30 * 60 * 1000)
         {
             let timeleft = new Date((30 * 60 * 1000) - (msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
@@ -94,8 +95,31 @@ client.on("message", msg => {
 
 // Shows the top 3 positions / scores in the topic. Updates every second
 setInterval(updateTopic, 1000);
-function updateTopic() {
+async function updateTopic() {
+    for(channel of Object.keys(wChannels))
+    {
+        try
+        {
+            let rankings = [];
+            console.log(JSON.stringify(wChannels));
+            for(user of Object.keys(wChannels[channel]))
+            {
+                rankings.push({ id: (await client.users.fetch(user)).username, score: wChannels[channel][user].score });
+            }
+            rankings.sort((a, b) => { return a.score > b.score});
+            let topicString = [
+                rankings[0] ? `1st - ${rankings[0].id} (${rankings[0].score} points)` : null,
+                rankings[1] ? `2nd - ${rankings[0].id} (${rankings[0].score} points)` : null,
+                rankings[2] ? `3rd - ${rankings[0].id} (${rankings[0].score} points)` : null
+            ].filter(item => item != null).join(" | ");
+            client.channels.find(ch => ch.id === channel).setTopic(topicString);
+        }
+        catch (e)
+        {
+            client.channels.find(ch => ch.id === channel).send(`Could not update topic: ${e}`);
+        }
 
+    }
 }
 
 setInterval(updatePins, 1000);
