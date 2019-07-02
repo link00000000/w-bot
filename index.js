@@ -48,10 +48,11 @@ client.on("message", msg => {
             msg.reply(`W-Bot has been removed from this channel. Mention me again in this channel to add me back.`);
             console.log(`Removed W-Bot from channel ${msg.channel.id}`);
         }
+        return;
     }
 
     // Executed if a message is sent in a wChannel
-    else if(wChannels[msg.channel.id])
+    if(wChannels[msg.channel.id])
     {
         // If message is not 'w'
         if(msg.content != "w")
@@ -64,6 +65,25 @@ client.on("message", msg => {
             {
                 msg.reply(`Unable to delete message: ${e}`);
             }
+            return;
+        }
+
+        // Add new user to competition if not already in it
+        if(!wChannels[msg.channel.id][msg.author.id])
+        {
+            wChannels[msg.channel.id][msg.author.id] = {
+                lastMessageTime: msg.createdTimestamp,
+                score: 1
+            };
+            return;
+        }
+
+        // Check if message was sent too quickly
+        if(msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime < 30 * 60 * 1000)
+        {
+            let timeleft = new Date((30 * 60 * 1000) - (msg.createdTimestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
+            msg.reply(`You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left)`);
+            return;
         }
     }
 });
