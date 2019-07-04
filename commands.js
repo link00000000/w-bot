@@ -9,11 +9,12 @@ let commands = {
             let cooldowns = [];
             for(userId of Object.keys(wChannels[channel]))
             {
-                let timeDifference = new Date((30 * 60 * 1000) - msg.timestamp - wChannels[channel][userId].lastMessageTime);
+                let timeDifference = new Date((30 * 60 * 1000) - (msg.timestamp - wChannels[channel][userId].lastMessageTime));
                 let data = {
                     name: (await bot.users.find(user => user.id === userId).username),
                     value: timeDifference > 0 ? `${timeDifference.getMinutes()}:${timeDifference.getSeconds()}` : "0:00"
                 };
+                console.log(timeDifference.getTime());
                 cooldowns.push(data);
             }
             let embed = {
@@ -32,12 +33,12 @@ let commands = {
                     },
                     "fields": [{
                             "name": "User",
-                            "value": cooldowns.map(item => item.name).join("\n"),
+                            "value": cooldowns.map(item => item.name).join("\n") || "",
                             "inline": true
                         },
                         {
                             "name": "Time remaining",
-                            "value": cooldowns.map(item => item.value).join("\n"),
+                            "value": cooldowns.map(item => item.value).join("\n") || "",
                             "inline": true
                         }
                     ]
