@@ -129,7 +129,7 @@ let wChannels = {}; // Contains different channels with users
             {
                 msg.delete();
                 let timeleft = new Date((30 * 60 * 1000) - (msg.timestamp - wChannels[msg.channel.id][msg.author.id].lastMessageTime));
-                let myMsg = await bot.createMessage(msg.channel.id, `You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left). Your message wad deleted.\n*This message will self destruct in 1 minute*`);
+                let myMsg = await bot.createMessage(msg.channel.id, `You can only send a message every 30 minutes (${timeleft.getMinutes()}:${timeleft.getSeconds()} left). Your message was deleted.\n*This message will self destruct in 1 minute*`);
                 setTimeout(() => { myMsg.delete(); }, 1 * 60 * 1000);
                 return;
             }
